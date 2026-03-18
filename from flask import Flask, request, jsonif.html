@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetShop Cuidar - Agendar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f8ff;
+        }
+        header {
+            background: #4a90e2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #4a90e2;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover { background: #357abd; }
+        .agenda {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .ag-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background: #f9f9f9;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .sucesso { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; }
+        .erro { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .form { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🐾 PetShop Cuidar</h1>
+        <p>Agende seu serviço agora mesmo!</p>
+    </header>
+
+    <div class="form">
+        <h2>📅 Novo Agendamento</h2>
+        <form id="formAgendar">
+            <div class="form-group">
+                <label>Seu Nome *</label>
+                <input type="text" id="nome" required>
+            </div>
+            <div class="form-group">
+                <label>Nome do Pet *</label>
+                <input type="text" id="pet" required>
+            </div>
+            <div class="form-group">
+                <label>Serviço *</label>
+                <select id="servico" required>
+                    <option value="">Escolha...</option>
+                    <option value="Banho & Tosa">🛁 Banho & Tosa - R$35</option>
+                    <option value="Banho Simples">🚿 Banho Simples - R$25</option>
+                    <option value="Tosa">✂️ Tosa - R$30</option>
+                    <option value="Corte de Unhas">💅 Unhas - R$15</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Data *</label>
+                <input type="date" id="data" required>
+            </div>
+            <div class="form-group">
+                <label>Horário *</label>
+                <select id="hora" required>
+                    <option value="">Escolha...</option>
+                    <option value="08:00">08:00</option>
+                    <option value="09:00">09:00</option>
+                    <option value="10:00">10:00</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                    <option value="16:00">16:00</option>
+                </select>
+            </div>
+            <button type="submit">✅ Agendar</button>
+        </form>
+        <div id="mensagem"></div>
+    </div>
+
+    <div class="agenda">
+        <h3>📋 Agendamentos de Hoje</h3>
+        <div id="lista"></div>
+    </div>
+
+    <script>
+        // Data mínima = hoje
+        document.getElementById('data').min = new Date().toISOString().split('T')[0];
+
+        // Formulário
+        document.getElementById('formAgendar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const dados = {
+                nome: document.getElementById('nome').value,
+                pet: document.getElementById('pet').value,
+                servico: document.getElementById('servico').value,
+                data: document.getElementById('data').value,
+                hora: document.getElementById('hora').value
+            };
+
+            try {
+                const resp = await fetch('http://localhost:5000/api/agendamentos', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(dados)
+                });
+                
+                if (resp.ok) {
+                    document.getElementById('mensagem').innerHTML = 
+                        '<div class="sucesso">✅ Agendamento realizado!</div>';
+                    document.getElementById('formAgendar').reset();
+                    carregarAgenda();
+                }
+            } catch {
+                document.getElementById('mensagem').innerHTML = 
+                    '<div class="erro">❌ Erro ao agendar</div>';
+            }
+        });
+
+        // Carregar agenda
+        async function carregarAgenda() {
+            try {
+                const resp = await fetch('http://localhost:5000/api/agendamentos');
+                const ags = await resp.json();
+                const hoje = new Date().toISOString().split('T')[0];
+                const hojeAgs = ags.filter(a => a.data === hoje);
+                
+                if (hojeAgs.length === 0) {
+                    document.getElementById('lista').innerHTML = 
+                        '<p>Nenhum agendamento hoje</p>';
+                    return;
+                }
+                
+                document.getElementById('lista').innerHTML = hojeAgs.map(a => `
+                    <div class="ag-item">
+                        <strong>${a.hora}</strong> - ${a.servico}<br>
+                        ${a.nome} com ${a.pet}
+                    </div>
+                `).join('');
+            } catch {
+                document.getElementById('lista').innerHTML = '<p>Erro ao carregar</p>';
+            }
+        }
+
+        // Carrega ao abrir
+        carregarAgenda();
+    </script>
+</body>
+</html>
