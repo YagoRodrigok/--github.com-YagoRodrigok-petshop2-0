@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Carrinho</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 50px auto; }
+        .item { border: 1px solid #ccc; padding: 15px; margin: 10px 0; }
+        .total { font-size: 28px; color: green; text-align: right; }
+    </style>
+</head>
+<body>
+    <h1>🛒 Carrinho</h1>
+    <a href="/">← Voltar</a>
+    
+    {% if carrinho %}
+        {% for item in carrinho %}
+        <div class="item">
+            <strong>{{ item.nome }}</strong> 
+            x{{ item.qtd }} = R$ {{ "%.2f"|format(item.preco * item.qtd) }}
+        </div>
+        {% endfor %}
+        <div class="total">Total: R$ {{ "%.2f"|format(total) }}</div>
+    {% else %}
+        <p>Carrinho vazio! <a href="/">Comprar</a></p>
+    {% endif %}
+</body>
+</html>

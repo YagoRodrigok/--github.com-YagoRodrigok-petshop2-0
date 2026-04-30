@@ -1,0 +1,143 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+export const vitePort = 3000;
+
+export default defineConfig(({ mode }) => {
+  return {
+    plugins: [
+      react(),
+      {
+        name: 'handle-source-map-requests',
+        apply: 'serve',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            if (req.url && req.url.endsWith('.map')) {
+              const cleanUrl = req.url.split('?')[0];
+              req.url = cleanUrl;
+            }
+            next();
+          });
+        },
+      },
+      {
+        name: 'add-cors-headers',
+        apply: 'serve',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader(
+              'Access-Control-Allow-Methods',
+              'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+            );
+            res.setHeader(
+              'Access-Control-Allow-Headers',
+              'Content-Type, Authorization, X-Requested-With',
+            );
+
+            if (req.method === 'OPTIONS') {
+              res.statusCode = 204;
+              return res.end();
+            }
+
+            next();
+          });
+        },
+      },
+    ].filter(Boolean),
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './client/src'),
+      },
+    },
+    root: path.join(process.cwd(), 'client'),
+    build: {
+      outDir: path.join(process.cwd(), 'dist/public'),
+      emptyOutDir: true,
+    },
+    clearScreen: false,
+    server: {
+      hmr: {
+        overlay: false,
+      },
+      host: true,
+      port: vitePort,
+      allowedHosts: true,
+      cors: true,
+      proxy: {
+        '/api/': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+        },
+      },
+    },
+    css: {
+      devSourcemap: true,
+    },
+    esbuild: {
+      sourcemap: true,
+    },
+  };
+});
+```
+
+### tailwind.config.js
+```javascript
+export default {
+  darkMode: ['class'],
+  content: ['./client/index.html', './client/src/**/*.{js,jsx,ts,tsx}'],
+  theme: {
+    extend: {
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+      colors: {
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        chart: {
+          1: 'hsl(var(--chart-1))',
+          2: 'hsl(var(--chart-2))',
+          3: 'hsl(var(--chart-3))',
+          4: 'hsl(var(--chart-4))',
+          5: 'hsl(var(--chart-5))',
+        },
+      },
+    },
+  },
+  plugins: [require('tailwindcss-animate')],
+};
+```

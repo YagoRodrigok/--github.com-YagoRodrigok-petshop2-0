@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
+import flask_cors # type: ignore
 import sqlite3
 from datetime import datetime, date
 import json
 
 app = Flask(__name__)
-CORS(app)
+flask_cors.CORS(app)
 
 # Inicializar banco de dados
 def init_db():

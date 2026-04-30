@@ -1,0 +1,46 @@
+# Criar pasta templates e TODOS os 6 arquivos HTML
+mkdir templates && (
+echo '<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Shop - Home</title>
+    <link rel="stylesheet" href="{{ url_for("static", filename="style.css") }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-paw"></i>
+                <a href="/">PetShop</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/produtos">Produtos</a></li>
+                <li><a href="/servicos">Serviços</a></li>
+                <li><a href="/contato">Contato</a></li>
+                <li><a href="/carrinho" class="cart-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count">0</span>
+                </a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Bem-vindo ao PetShop</h1>
+            <p>Tudo para o seu pet com amor e qualidade!</p>
+            <a href="/produtos" class="btn-primary">Ver Produtos</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <section class="featured-products">
+            <h2>Produtos em Destaque</h2>
+            <div class="products-grid">
+                {% for produto in produtos%5[:3] %}
+                <div class="product-card">
+                    <img src="{{ url_for("static", filename="images/" + produto.imagem) }}"

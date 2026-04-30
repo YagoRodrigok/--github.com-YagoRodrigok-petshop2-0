@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pet Shop</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 50px auto; }
+        .produto { border: 1px solid #ccc; padding: 20px; margin: 10px 0; }
+        .preco { font-size: 24px; color: green; }
+        button { background: #4285f4; color: white; padding: 10px; border: none; cursor: pointer; }
+        #cart-count { background: red; color: white; padding: 5px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <h1>🐕 Pet Shop 🐱</h1>
+    <a href="/carrinho">Carrinho (<span id="cart-count">0</span>)</a>
+    
+    {% for p in produtos %}
+    <div class="produto">
+        <h3>{{ p.nome }}</h3>
+        <div class="preco">R$ {{ p.preco }}</div>
+        <input type="number" id="qtd{{ p.id }}" value="1" min="1" style="width:50px">
+        <button onclick="addCart({{ p.id }})">Adicionar</button>
+    </div>
+    {% endfor %}
+
+    <script>
+        let total = 0;
+        function updateCount() {
+            document.getElementById('cart-count').textContent = total;
+        }
+        
+        async function addCart(id) {
+            let qtd = document.getElementById('qtd'+id).value;
+            let res = await fetch('/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: id, nome: 'Produto '+id, preco: 50, qtd: qtd*1})
+            });
+            let data = await res.json();
+            total = data.total;
+            updateCount();
+            alert('Adicionado!');
+        }
+    </script>
+</body>
+</html>
