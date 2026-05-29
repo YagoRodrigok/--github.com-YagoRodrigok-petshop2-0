@@ -1,0 +1,38 @@
+@startuml ClassesPetshop
+skinparam backgroundColor #FEFEFE
+
+class Pet {
+    - nome: String
+    - especie: String
+    - dono: String
+    - servico: String
+    - horario: String
+    --
+    + getData()
+}
+
+class PetshopApp {
+    - app: Flask
+    - pets: List<Pet>
+    --
+    + index(): HTML
+    + cadastrar(): HTML
+    + detalhes(pet_id: int): HTML
+    + editar(pet_id: int): HTML
+    + remover(pet_id: int): void
+    + validarIndice(pet_id: int): bool
+}
+
+class FlaskApp {
+    - config: dict
+    --
+    + route(path: String)
+    + run(debug: bool)
+    + render_template(template: String, **params)
+}
+
+PetshopApp --> FlaskApp : usa
+PetshopApp --> Pet : gerencia
+Pet : id (índice)
+
+@enduml

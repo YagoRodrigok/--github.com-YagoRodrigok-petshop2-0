@@ -1,0 +1,27 @@
+@startuml CasosDePetshop
+skinparam backgroundColor #FEFEFE
+left to right direction
+
+actor Usuario as user
+
+rectangle "Sistema Petshop" {
+    usecase "Visualizar Lista de Pets" as VLP
+    usecase "Cadastrar Pet" as CAD
+    usecase "Ver Detalhes do Pet" as DET
+    usecase "Editar Dados do Pet" as EDT
+    usecase "Remover Pet" as REM
+}
+
+user --> VLP
+user --> CAD
+user --> DET
+user --> EDT
+user --> REM
+
+CAD --> VLP : redireciona
+EDT --> DET : redireciona
+REM --> VLP : redireciona
+DET --> EDT : acessa edição
+DET --> REM : acessa remoção
+
+@enduml
